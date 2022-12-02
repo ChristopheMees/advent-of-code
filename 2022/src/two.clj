@@ -1,42 +1,44 @@
 (ns two
-  (:require [util :refer [split-rn]]))
-
-(def input (slurp "src/two/input"))
-
-(def points {\A 1 \B 2 \C 3 \X 1 \Y 2 \Z 3})
+  (:require [clojure.java.io :refer [reader]]))
 
 (defn round->score [[op mp]]
-  (case op
-    1 ([3 6 0] (dec mp))
-    2 ([0 3 6] (dec mp))
-    3 ([6 0 3] (dec mp))))
+  (-> [[3 6 0]
+       [0 3 6]
+       [6 0 3]]
+      (nth (dec op))
+      (nth (dec mp))))
 
 (defn xscore [mod-round]
   (comp (map (juxt first last))
-        (map #(map points %))
+        (map #(map {\A 1 \B 2 \C 3 \X 1 \Y 2 \Z 3} %))
         (map mod-round)
         (map (juxt second round->score))
         (map (partial apply +))))
 
-(defn score [xform]
-  (transduce xform + (split-rn input)))
+(defn score [xform coll]
+  (transduce xform + coll))
+
+(defn calculate [xform]
+  (with-open [rdr (reader "src/two/input")]
+    (score xform (line-seq rdr))))
 
 ;Score based on x=rock y=paper z=scissors
 
-(def score1 (score (xscore identity)))
+(defn score1 [] (calculate (xscore identity)))
 
 (comment
-  (= score1 8933))
+  (= (time (score1)) 8933))
 
 ;Score based on x=loss y=draw z=win (ldw)
 
 (defn ldw->round [[op ldw]]
-  (case ldw
-    1 ([3 1 2] (dec op))
-    2 op
-    3 ([2 3 1] (dec op))))
+  (-> [[3 1 2]
+       [1 2 3]
+       [2 3 1]]
+      (nth (dec ldw))
+      (nth (dec op))))
 
-(def score2 (score (xscore (juxt first ldw->round))))
+(defn score2 [] (calculate (xscore (juxt first ldw->round))))
 
 (comment 
-  (= score2 11998))
+  (= (time (score2)) 11998))

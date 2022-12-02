@@ -1,7 +1,5 @@
 (ns one
-  (:require [util :refer [split-rn]]))
-
-(def input (slurp "src/one/input"))
+  (:require [clojure.java.io :refer [reader]]))
 
 (defn nums->sum [nums]
   (transduce (map parse-long) + nums))
@@ -9,14 +7,23 @@
 (defn drop-min [coll n]
   (remove (partial = (apply min n coll)) (conj coll n)))
 
-(defn top-cals [n]
+(def lines->sums (comp
+                  (partition-by #(-> % count (= 0)))
+                  (filter #(-> % first count (> 0)))
+                  (map nums->sum)))
+
+(defn top-cals [n coll]
   (transduce
-   (comp (map split-rn) (map nums->sum))
+   lines->sums
    (completing drop-min)
    (range (* -1 n) 0)
-   (split-rn 2 input)))
+   coll))
 
-(comment
-  (= (first (top-cals 1)) 70720)
-  (= (reduce + (top-cals 3)) 207148)
+(defn calculate [n]
+  (with-open [rdr (reader "src/one/input")]
+    (top-cals n (line-seq rdr))))
+
+(comment 
+  (= (time (first (calculate 1))) 70720)
+  (= (time (reduce + (calculate 3))) 207148)
   )
