@@ -1,11 +1,7 @@
 (ns one
-  (:require [clojure.string :refer [split]]))
+  (:require [util :refer [split-rn]]))
 
 (def input (slurp "src/one/input"))
-
-(defn split-rn 
-  ([s] (split-rn 1 s))
-  ([n s] (->> "\r\n" (repeat n) (apply str) re-pattern (split s))))
 
 (defn nums->sum [nums]
   (transduce (map parse-long) + nums))
