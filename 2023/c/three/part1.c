@@ -141,12 +141,6 @@ int main()
                 continue;
             }
 
-            if (ch >= '0' && ch <= '9')
-            {
-                grid[y][x] = ch;
-                continue;
-            }
-
             if (ch != '.')
             {
                 struct coord xy = {x, y};
